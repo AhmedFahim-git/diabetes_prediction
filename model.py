@@ -36,7 +36,7 @@ def get_test_data(sqlalchemy_engine):
 
 
 @task(name="Train and test model", retries=3, retry_delay_seconds=10)
-def train_and_test(train_df: pd.DataFame, test_df=pd.DataFrame):
+def train_and_test(train_df: pd.DataFrame, test_df=pd.DataFrame):
     X_train = train_df[[col for col in train_df.columns if col != "Outcome"]]
     X_test = test_df[[col for col in test_df.columns if col != "Outcome"]]
 
