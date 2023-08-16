@@ -22,7 +22,7 @@ def init_db(sqlalchemy_engine):
         df, test_size=0.25, random_state=1234, stratify=df["Outcome"]
     )
     train.to_sql(name="train", if_exists="replace", con=sqlalchemy_engine, index=False)
-    test.to_sql(name="train", if_exists="replace", con=sqlalchemy_engine, index=False)
+    test.to_sql(name="test", if_exists="replace", con=sqlalchemy_engine, index=False)
 
 
 @task(name="Fetch train data", retries=3, retry_delay_seconds=10)
