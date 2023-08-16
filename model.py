@@ -88,8 +88,8 @@ def train_and_test(train_df: pd.DataFrame, test_df=pd.DataFrame):
 
 @flow
 def main_flow():
-    init_db()
     engine = create_engine("postgresql://user:example@localhost:5432/my_db")
+    init_db(engine)
     train_df = get_train_data(engine)
     test_df = get_test_data(engine)
 
