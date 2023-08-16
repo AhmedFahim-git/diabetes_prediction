@@ -50,8 +50,6 @@ def train_and_test(train_df: pd.DataFrame, test_df=pd.DataFrame):
     y_train = train_df["Outcome"]
     y_test = test_df["Outcome"]
 
-    set_env_vars()
-
     client = MlflowClient(tracking_uri="http://127.0.0.1:5000")
 
     mlflow.set_tracking_uri("http://127.0.0.1:5000")
@@ -101,6 +99,8 @@ def main_flow():
     init_db(engine)
     train_df = get_train_data(engine)
     test_df = get_test_data(engine)
+
+    set_env_vars()
 
     train_and_test(train_df=train_df, test_df=test_df)
 
