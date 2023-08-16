@@ -5,6 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
+import os
 
 from mlflow import MlflowClient
 from sqlalchemy import create_engine
@@ -35,6 +36,12 @@ def get_test_data(sqlalchemy_engine):
     return pd.read_sql_table("test", con=sqlalchemy_engine)
 
 
+@task(name="Set environment variables")
+def set_env_vars():
+    os.environ["MLFLOW_TRACKING_URI"] = "http://localhost:5000"
+    os.environ["MLFLOW_S3_ENDPOINT_URL"] = "http://localhost:4566"
+
+
 @task(name="Train and test model", retries=3, retry_delay_seconds=10)
 def train_and_test(train_df: pd.DataFrame, test_df=pd.DataFrame):
     X_train = train_df[[col for col in train_df.columns if col != "Outcome"]]
@@ -42,6 +49,8 @@ def train_and_test(train_df: pd.DataFrame, test_df=pd.DataFrame):
 
     y_train = train_df["Outcome"]
     y_test = test_df["Outcome"]
+
+    set_env_vars()
 
     client = MlflowClient(tracking_uri="http://127.0.0.1:5000")
 
