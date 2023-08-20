@@ -1,5 +1,6 @@
 services:
   db:
+    container_name: My_Postgres
     image: postgres
     restart: always
     environment:
@@ -8,6 +9,17 @@ services:
       POSTGRES_DB: my_db
     ports:
       - 5432:5432
+
+  testdb:
+    container_name: My_Test_Postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: my_db
+    ports:
+      - 5433:5432
 
   localstack:
     container_name: "my_localstack_container"
@@ -19,3 +31,38 @@ services:
       - DEBUG=0
       - DOCKER_HOST=unix:///var/run/docker.sock
       - PERSIST_ALL=false
+
+  adminer:
+    command: php -S 0.0.0.0:8080 -t /var/www/html # This command is only needed when the host doesn't support IPv6
+    image: adminer
+    container_name: Adminer
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+
+  # grafana:
+  #   image: grafana/grafana
+  #   container_name: grafana
+  #   volumes:
+  #     - ./config/grafana_datasources.yaml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
+  #     - ./config/grafana_dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml:ro
+  #     - ./dashboards:/opt/grafana/dashboards:ro
+  #   restart: always
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - 3000:3000
+
+  all_logic:
+    container_name: All_logic
+    build: all_logic/
+    restart: always
+    depends_on:
+      - db
+      - localstack
+    ports:
+      - 5000:5000
+      - 4200:4200
+      - 8000:8000

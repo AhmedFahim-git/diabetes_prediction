@@ -1,16 +1,15 @@
-import mlflow
+from __future__ import annotations
 
-from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-import pandas as pd
-import numpy as np
-import os
-
-from mlflow import MlflowClient
-from sqlalchemy import create_engine
-from prefect import task, flow
 import matplotlib
+import mlflow
+import pandas as pd
+from mlflow import MlflowClient
+from prefect import flow
+from prefect import task
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import train_test_split
+from sqlalchemy import create_engine
 
 matplotlib.use("Agg")
 
@@ -36,12 +35,6 @@ def get_test_data(sqlalchemy_engine):
     return pd.read_sql_table("test", con=sqlalchemy_engine)
 
 
-@task(name="Set environment variables")
-def set_env_vars():
-    os.environ["MLFLOW_TRACKING_URI"] = "http://localhost:5000"
-    os.environ["MLFLOW_S3_ENDPOINT_URL"] = "http://localhost:4566"
-
-
 @task(name="Train and test model", retries=3, retry_delay_seconds=10)
 def train_and_test(train_df: pd.DataFrame, test_df=pd.DataFrame):
     X_train = train_df[[col for col in train_df.columns if col != "Outcome"]]
@@ -60,9 +53,13 @@ def train_and_test(train_df: pd.DataFrame, test_df=pd.DataFrame):
         max_tuning_runs=None,
     )
     clf = RandomForestClassifier()
+    # parameters = {
+    #     "criterion": ("gini", "log_loss", "entropy"),
+    #     "min_samples_leaf": (1, 5, 10),
+    # }
     parameters = {
-        "criterion": ("gini", "log_loss", "entropy"),
-        "min_samples_leaf": (1, 5, 10),
+        "criterion": ("gini",),
+        "min_samples_leaf": (1, 5),
     }
     grid_search = GridSearchCV(
         clf,
@@ -95,26 +92,13 @@ def train_and_test(train_df: pd.DataFrame, test_df=pd.DataFrame):
 
 @flow
 def main_flow():
-    engine = create_engine("postgresql://user:example@localhost:5432/my_db")
+    engine = create_engine("postgresql://user:example@db:5432/my_db")
     init_db(engine)
     train_df = get_train_data(engine)
     test_df = get_test_data(engine)
-
-    set_env_vars()
 
     train_and_test(train_df=train_df, test_df=test_df)
 
 
 if __name__ == "__main__":
     main_flow()
-
-# df = pd.read_csv("diabetes-vid.csv")
-# df["Outcome"] = (df["Outcome"] == "dead").apply(int)
-
-# X_train, X_test, y_train, y_test = train_test_split(
-#     df[[col for col in df.columns if col != "Outcome"]],
-#     df["Outcome"],
-#     test_size=0.20,
-#     random_state=1234,
-#     stratify=df["Outcome"],
-# )
