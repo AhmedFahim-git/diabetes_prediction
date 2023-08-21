@@ -53,13 +53,9 @@ def train_and_test(train_df: pd.DataFrame, test_df=pd.DataFrame):
         max_tuning_runs=None,
     )
     clf = RandomForestClassifier()
-    # parameters = {
-    #     "criterion": ("gini", "log_loss", "entropy"),
-    #     "min_samples_leaf": (1, 5, 10),
-    # }
     parameters = {
-        "criterion": ("gini",),
-        "min_samples_leaf": (1, 5),
+        "criterion": ("gini", "log_loss", "entropy"),
+        "min_samples_leaf": (1, 5, 10),
     }
     grid_search = GridSearchCV(
         clf,

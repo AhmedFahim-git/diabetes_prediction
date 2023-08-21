@@ -36,7 +36,6 @@ def get_predictions(input_df):
 
 
 def get_data():
-    print(basedir)
     df = pd.read_csv(basedir / "diabetes-vid.csv")
     df["Outcome"] = (df["Outcome"] == "dead").apply(int)
     return df

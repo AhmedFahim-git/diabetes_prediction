@@ -7,6 +7,8 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: example
       POSTGRES_DB: my_db
+    volumes:
+      - my_db:/var/lib/postgresql/data
     ports:
       - 5432:5432
 
@@ -42,18 +44,18 @@ services:
     depends_on:
       - db
 
-  # grafana:
-  #   image: grafana/grafana
-  #   container_name: grafana
-  #   volumes:
-  #     - ./config/grafana_datasources.yaml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
-  #     - ./config/grafana_dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml:ro
-  #     - ./dashboards:/opt/grafana/dashboards:ro
-  #   restart: always
-  #   depends_on:
-  #     - db
-  #   ports:
-  #     - 3000:3000
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    volumes:
+      - ./config/grafana_datasources.yaml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
+      - ./config/grafana_dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml:ro
+      - ./dashboards:/opt/grafana/dashboards:ro
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - 3000:3000
 
   all_logic:
     container_name: All_logic
@@ -66,3 +68,5 @@ services:
       - 5000:5000
       - 4200:4200
       - 8000:8000
+volumes:
+  my_db:

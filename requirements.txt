@@ -1,0 +1,7 @@
+pandas
+pre-commit
+psycopg2-binary
+pytest
+requests
+scikit-learn
+sqlalchemy
